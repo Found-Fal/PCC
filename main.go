@@ -4,7 +4,9 @@ import (
 	"log"
 	"main/fungsi"
 	"main/models"
-	"main/wa"
+	"main/telegram"
+
+	//"main/wa"
 	"os"
 	"time"
 
@@ -122,6 +124,11 @@ func main() {
 	port := os.Getenv("PORT")
 	go r.Run(":" + port)
 	//ai.MulaiChatAi()
-	ai.InitAi()
-	wa.KonekWa(db)
+	ai.InitAI()
+	err = telegram.StartBot()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	//wa.KonekWa(db)
 }

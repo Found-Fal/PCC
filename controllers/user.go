@@ -27,7 +27,7 @@ type StrukturUserUbah struct {
 
 type StrukturUserHapus struct {
 	Id uint `binding:"required"`
-}	
+}
 
 type StrukturLogin struct {
 	Username string `binding:"required"`
@@ -78,7 +78,6 @@ func UserTambah(c *gin.Context) {
 	var encrypted = sha.Sum(nil)
 	var encryptedString = fmt.Sprintf("%x", encrypted)
 
-
 	//membuat data baru dengan model user
 	modeluser := models.User{
 		Nama:     datauser.Nama,
@@ -87,19 +86,19 @@ func UserTambah(c *gin.Context) {
 	}
 	hasil := db.Create(&modeluser)
 
-if hasil.Error == nil {
-	c.JSON(http.StatusOK, gin.H{
-		"status": true,
-		"pesan": "Berhasil tambah data",
-		"data": modeluser,
-	})
-} else {
-	c.JSON(http.StatusOK, gin.H{
-		"status": false,
-		"pesan": "Gagal tambah data",
-		"kesalahan": hasil.Error.Error(),
-	})
-}
+	if hasil.Error == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": true,
+			"pesan":  "Berhasil tambah data",
+			"data":   modeluser,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"status":    false,
+			"pesan":     "Gagal tambah data",
+			"kesalahan": hasil.Error.Error(),
+		})
+	}
 }
 
 func UserUbah(c *gin.Context) {
@@ -119,12 +118,12 @@ func UserUbah(c *gin.Context) {
 	//membuat variabel model user
 	var modeluser models.User
 	//mencari data user dan merubah datanya
-	cekUser :=db.First(&modeluser, datauser.Id)
+	cekUser := db.First(&modeluser, datauser.Id)
 	if cekUser.Error == nil {
 		//ekripsi password dengan sha1
 		var sha = sha1.New()
 		sha.Write([]byte(datauser.Password))
-		var encrypted =sha.Sum(nil)
+		var encrypted = sha.Sum(nil)
 		var encryptedString = fmt.Sprintf("%x", encrypted)
 
 		modeluser.Nama = datauser.Nama
@@ -148,7 +147,7 @@ func UserUbah(c *gin.Context) {
 				"data":      modeluser,
 			})
 		}
-	}else {
+	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"status":    false,
 			"pesan":     "Data tidak ditemukan",
@@ -157,7 +156,6 @@ func UserUbah(c *gin.Context) {
 		})
 	}
 }
-
 
 func UserHapus(c *gin.Context) {
 	//ambil koneksi variabel db dari main
@@ -198,7 +196,7 @@ func UserHapus(c *gin.Context) {
 
 func UserLogin(c *gin.Context) (any, error) {
 	//ambil koneksi variabel db dari main
-	db := c.MustGet("db").(*gorm.DB)	
+	db := c.MustGet("db").(*gorm.DB)
 	//membuat variabel data user dengan struktur user dan menangkap data dari request
 	var dataLogin StrukturLogin
 	if err := c.ShouldBindJSON(&dataLogin); err != nil {
@@ -219,7 +217,7 @@ func UserLogin(c *gin.Context) (any, error) {
 		//kembalikan data user dan eror=nil
 		return &modelUser, nil
 	} else {
-		//kembalikan data kosong dan eror gagal login 
+		//kembalikan data kosong dan eror gagal login
 		return nil, jwtV3.ErrFailedAuthentication
 	}
 }

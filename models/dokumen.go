@@ -7,6 +7,6 @@ import (
 type Dokumen struct {
 	gorm.Model
 	NamaDokumen string
-	FileId		string
-	FileUrl	    string
+	FileId      string
+	FileUrl     string
 }

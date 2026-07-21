@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"main/models"
 	"main/koneksi"
+	"main/models"
 )
 
 // struct untuk menerima input dari client

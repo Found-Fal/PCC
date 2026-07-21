@@ -22,9 +22,9 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
 
-	"main/models"
-	"main/ai"
 	"gorm.io/gorm"
+	"main/ai"
+	"main/models"
 )
 
 // variabel untuk client whatsapp
@@ -121,7 +121,7 @@ func KonekWa(db *gorm.DB) {
 	}
 
 	if deviceStore != nil {
-    	deviceStore.Platform = "macOS"
+		deviceStore.Platform = "macOS"
 	}
 	clientLog := waLog.Stdout("Client", "DEBUG", true)
 	client := whatsmeow.NewClient(deviceStore, clientLog)
@@ -186,4 +186,3 @@ func kirimPesanText(IDPenerima types.JID, isiPesan string) {
 		},
 	)
 }
-
