@@ -8,19 +8,16 @@ import (
 var AI *Router
 
 func InitAI() {
-	// Groq menjadi provider utama
-	AI = NewRouter("groq")
+	AI = NewRouter("gemini")
 
-	// Daftarkan semua provider AI
-	AI.Register(NewGroq())
-	AI.Register(NewClaude())
 	AI.Register(NewGemini())
+	AI.Register(NewClaude())
+	AI.Register(NewGroq())
 
-	// Urutan fallback
 	AI.SetFallback([]string{
-		"groq",
-		"claude",
 		"gemini",
+		"claude",
+		"groq",
 	})
 }
 
