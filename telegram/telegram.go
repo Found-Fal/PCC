@@ -13,6 +13,11 @@ import (
 
 var bot *tgbotapi.BotAPI
 
+// Batas aman panjang pesan Telegram.
+// Batas Telegram sekitar 4096 karakter,
+// sehingga digunakan 4000 sebagai batas aman.
+const maxTelegramMessageLength = 4000
+
 // StartBot menjalankan Telegram Bot
 func StartBot() error {
 
@@ -43,7 +48,6 @@ func StartBot() error {
 
 	// Konfigurasi menerima pesan
 	config := tgbotapi.NewUpdate(0)
-
 	config.Timeout = 60
 
 	updates := bot.GetUpdatesChan(config)
@@ -98,6 +102,7 @@ func handleMessage(
 		return
 	}
 
+	// Perintah /start
 	if strings.ToLower(pertanyaan) == "/start" {
 
 		kirimPesan(
@@ -113,6 +118,7 @@ func handleMessage(
 		return
 	}
 
+	// Perintah /help
 	if strings.ToLower(pertanyaan) == "/help" {
 
 		kirimPesan(
@@ -129,6 +135,7 @@ func handleMessage(
 		return
 	}
 
+	// Menampilkan status typing
 	typing := tgbotapi.NewChatAction(
 		message.Chat.ID,
 		tgbotapi.ChatTyping,
@@ -143,33 +150,127 @@ func handleMessage(
 		)
 	}
 
+	// Meminta jawaban dari AI
 	jawabanAI := ai.TanyaAi(
 		userID,
 		pertanyaan,
 	)
 
+	// Mengirim jawaban AI.
+	// Jika terlalu panjang, otomatis dipecah
+	// menjadi beberapa pesan Telegram.
 	kirimPesan(
 		message.Chat.ID,
 		jawabanAI,
 	)
 }
 
+// kirimPesan mengirim pesan ke Telegram.
+// Jika pesan melebihi batas aman Telegram,
+// pesan akan otomatis dipecah menjadi beberapa bagian.
 func kirimPesan(
 	chatID int64,
 	isiPesan string,
 ) {
 
-	msg := tgbotapi.NewMessage(
-		chatID,
+	if strings.TrimSpace(isiPesan) == "" {
+		return
+	}
+
+	// Pecah pesan jika terlalu panjang
+	pesanTerbagi := splitMessage(
 		isiPesan,
+		maxTelegramMessageLength,
 	)
 
-	_, err := bot.Send(msg)
+	// Kirim setiap bagian secara berurutan
+	for i, bagian := range pesanTerbagi {
 
-	if err != nil {
-		log.Println(
-			"gagal mengirim pesan Telegram:",
-			err,
+		msg := tgbotapi.NewMessage(
+			chatID,
+			bagian,
+		)
+
+		_, err := bot.Send(msg)
+
+		if err != nil {
+			log.Printf(
+				"gagal mengirim pesan Telegram bagian %d/%d: %v",
+				i+1,
+				len(pesanTerbagi),
+				err,
+			)
+
+			return
+		}
+	}
+}
+
+// splitMessage memecah pesan panjang menjadi beberapa bagian.
+// Pemotongan diusahakan dilakukan pada newline atau spasi
+// agar kata tidak terpotong.
+func splitMessage(
+	message string,
+	maxLength int,
+) []string {
+
+	if len(message) <= maxLength {
+		return []string{message}
+	}
+
+	var hasil []string
+
+	for len(message) > maxLength {
+
+		// Ambil bagian awal sesuai batas maksimal
+		bagian := message[:maxLength]
+
+		// Cari newline terakhir
+		index := strings.LastIndex(
+			bagian,
+			"\n",
+		)
+
+		// Jika tidak ada newline,
+		// cari spasi terakhir
+		if index <= 0 {
+			index = strings.LastIndex(
+				bagian,
+				" ",
+			)
+		}
+
+		// Jika tidak ditemukan spasi atau newline,
+		// potong langsung pada batas maksimal
+		if index <= 0 {
+			index = maxLength
+		}
+
+		// Ambil bagian pesan
+		potongan := strings.TrimSpace(
+			message[:index],
+		)
+
+		if potongan != "" {
+			hasil = append(
+				hasil,
+				potongan,
+			)
+		}
+
+		// Lanjutkan ke sisa pesan
+		message = strings.TrimSpace(
+			message[index:],
 		)
 	}
+
+	// Tambahkan sisa pesan
+	if strings.TrimSpace(message) != "" {
+		hasil = append(
+			hasil,
+			strings.TrimSpace(message),
+		)
+	}
+
+	return hasil
 }
