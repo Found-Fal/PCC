@@ -37,6 +37,8 @@ func main() {
 		})
 	})
 
+	r.POST("/api/ai/chat", ai.ChatHandler)
+
 	db.AutoMigrate(&models.Suhu{})
 	db.AutoMigrate(&models.Informasi{})
 	db.AutoMigrate(&models.User{})

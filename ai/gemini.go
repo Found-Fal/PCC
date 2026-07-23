@@ -20,7 +20,7 @@ func NewGemini() *Gemini {
 	model := os.Getenv("GEMINI_MODEL")
 
 	if model == "" {
-		model = "gemini-3.5-flash"
+		model = "gemini-3.6-flash"
 	}
 
 	return &Gemini{
