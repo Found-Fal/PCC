@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,9 +22,11 @@ func ChatHandler(c *gin.Context) {
 		})
 		return
 	}
+	log.Println("AI Request:", req.Pesan)
 
 	jawaban := TanyaAi("", req.Pesan)
 
+	log.Println("AI Response berhasil diterima")
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"pesan":   req.Pesan,
